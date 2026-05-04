@@ -6,16 +6,25 @@ on:
       - 'v*'
 
 jobs:
+  # ── Linux ARM64（银河麒麟 V10 兼容）─────────────────────────────────
+  # 在真实 ARM64 机器上运行 Ubuntu 20.04 容器，glibc 2.31 与麒麟 V10 一致
   build-linux-arm64:
     runs-on: ubuntu-24.04-arm
+    container:
+      image: ubuntu:20.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
     steps:
+      - name: Install system dependencies
+        run: |
+          apt-get update
+          apt-get install -y git curl build-essential python3 fakeroot libatomic1
+          curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+          apt-get install -y nodejs
+
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Install dependencies
+      - name: Install project dependencies
         run: npm install
 
       - name: Build
@@ -25,8 +34,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-arm64
-          path: dist/*.AppImage
+          path: |
+            dist/*.AppImage
+            dist/*.deb
 
+  # ── Windows x64 ──────────────────────────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
@@ -36,7 +48,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
+      - name: Install project dependencies
         run: npm install
 
       - name: Build
@@ -48,6 +60,7 @@ jobs:
           name: windows-x64
           path: dist/*.exe
 
+  # ── 创建 GitHub Release，附上所有安装包 ──────────────────────────────
   release:
     needs: [build-linux-arm64, build-windows]
     runs-on: ubuntu-latest
@@ -62,4 +75,5 @@ jobs:
         with:
           files: |
             linux-arm64/*.AppImage
+            linux-arm64/*.deb
             windows-x64/*.exe
