@@ -1,5 +1,5 @@
 <template>
-  <div class="pane" @click="termFocus">
+  <div ref="paneEl" class="pane" @click="termFocus" @contextmenu.prevent="showContextMenu">
     <!-- Terminal container — always in DOM so xterm has real dimensions -->
     <div ref="termEl" class="xterm-wrap" />
 
@@ -23,6 +23,23 @@
         <button class="btn btn-secondary" style="margin-top:12px" @click.stop="reconnect">重新连接</button>
       </template>
     </div>
+
+    <!-- Right-click context menu -->
+    <div
+      v-if="ctxMenu.visible"
+      class="term-ctx-menu"
+      :style="{ top: ctxMenu.y + 'px', left: ctxMenu.x + 'px' }"
+    >
+      <div class="term-ctx-item" :class="{ disabled: !ctxMenu.hasSelection }" @click="copySelection">
+        复制
+        <span class="term-ctx-hint">Ctrl+Shift+C</span>
+      </div>
+      <div class="term-ctx-item" @click="pasteFromClipboard">
+        粘贴
+        <span class="term-ctx-hint">Ctrl+Shift+V</span>
+      </div>
+    </div>
+    <div v-if="ctxMenu.visible" class="term-ctx-backdrop" @click="hideCtxMenu" />
   </div>
 </template>
 
@@ -39,7 +56,10 @@ const props = defineProps({
 })
 
 const store = useAppStore()
+const paneEl = ref(null)
 const termEl = ref(null)
+const ctxMenu = ref({ visible: false, x: 0, y: 0, hasSelection: false })
+
 let term = null
 let fitAddon = null
 let resizeObserver = null
@@ -63,8 +83,6 @@ onMounted(() => {
 
   fitAddon = new FitAddon()
   term.loadAddon(fitAddon)
-
-  // Open into a real, visible container — no display:none here
   term.open(termEl.value)
 
   term.onData((data) => {
@@ -77,6 +95,24 @@ onMounted(() => {
     if (props.tab.sessionId) {
       window.api.terminal.resize(props.tab.sessionId, cols, rows)
     }
+  })
+
+  // Ctrl+Shift+C / Ctrl+Shift+V
+  term.attachCustomKeyEventHandler((e) => {
+    if (e.ctrlKey && e.shiftKey) {
+      if (e.type === 'keydown' && e.key === 'C') {
+        const text = term.getSelection()
+        if (text) navigator.clipboard.writeText(text)
+        return false
+      }
+      if (e.type === 'keydown' && e.key === 'V') {
+        navigator.clipboard.readText().then(text => {
+          if (text) term.paste(text)
+        })
+        return false
+      }
+    }
+    return true
   })
 
   resizeObserver = new ResizeObserver(() => {
@@ -96,7 +132,6 @@ onMounted(() => {
     }
   })
 
-  // Already connected when component mounts (e.g. tab switch)
   if (props.tab.status === 'connected') {
     requestAnimationFrame(() => { fitAddon.fit(); term.focus() })
   }
@@ -123,6 +158,39 @@ watch(() => props.isActive, (active) => {
 
 function termFocus() {
   if (props.tab.status === 'connected') term?.focus()
+}
+
+function showContextMenu(e) {
+  if (props.tab.status !== 'connected') return
+  const rect = paneEl.value.getBoundingClientRect()
+  let x = e.clientX - rect.left
+  let y = e.clientY - rect.top
+  // Keep menu within pane bounds
+  if (x + 180 > rect.width) x = rect.width - 184
+  if (y + 80 > rect.height) y = rect.height - 84
+  ctxMenu.value = { visible: true, x, y, hasSelection: !!term?.getSelection() }
+}
+
+function hideCtxMenu() {
+  ctxMenu.value.visible = false
+}
+
+async function copySelection() {
+  const text = term?.getSelection()
+  if (text) await navigator.clipboard.writeText(text)
+  hideCtxMenu()
+  term?.focus()
+}
+
+async function pasteFromClipboard() {
+  try {
+    const text = await navigator.clipboard.readText()
+    if (text) term?.paste(text)
+  } catch {
+    // clipboard read permission denied
+  }
+  hideCtxMenu()
+  term?.focus()
 }
 
 async function reconnect() {
@@ -156,7 +224,6 @@ async function reconnect() {
   overflow: hidden;
 }
 
-/* Overlay sits on top of terminal, covers it completely */
 .status-overlay {
   position: absolute;
   inset: 0;
@@ -190,6 +257,49 @@ async function reconnect() {
   max-width: 320px;
   text-align: center;
   word-break: break-all;
+}
+
+/* ─── Terminal context menu ─── */
+.term-ctx-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+}
+
+.term-ctx-menu {
+  position: absolute;
+  background: #1e1e2e;
+  border: 1px solid #3a3a5a;
+  border-radius: 6px;
+  padding: 4px;
+  min-width: 180px;
+  z-index: 10;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+}
+
+.term-ctx-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #e8e8f0;
+  transition: background 0.1s;
+}
+
+.term-ctx-item:hover { background: #2a2a4a; }
+
+.term-ctx-item.disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.term-ctx-hint {
+  font-size: 11px;
+  color: #5a5a72;
 }
 
 :deep(.xterm) { height: 100%; }
