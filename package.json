@@ -2,6 +2,10 @@
   "name": "zorth-ssh",
   "version": "1.0.0",
   "description": "Team SSH Manager",
+  "author": {
+    "name": "zorth44",
+    "email": "nicolaszorth@gmail.com"
+  },
   "main": "./out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
