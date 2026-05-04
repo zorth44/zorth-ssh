@@ -1,0 +1,53 @@
+{
+  "name": "zorth-ssh",
+  "version": "1.0.0",
+  "description": "Team SSH Manager",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "dist:linux": "electron-vite build && electron-builder --linux --arm64",
+    "dist:win": "electron-vite build && electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.zorth.ssh",
+    "productName": "Zorth SSH",
+    "asar": true,
+    "directories": {
+      "buildResources": "resources",
+      "output": "dist"
+    },
+    "files": [
+      "out/**/*",
+      "!out/**/*.map"
+    ],
+    "linux": {
+      "target": [
+        { "target": "AppImage", "arch": ["arm64"] },
+        { "target": "deb", "arch": ["arm64"] }
+      ],
+      "category": "Network",
+      "executableName": "zorth-ssh"
+    },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] }
+      ]
+    }
+  },
+  "dependencies": {
+    "mysql2": "^3.9.4",
+    "ssh2": "^1.15.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@xterm/addon-fit": "^0.10.0",
+    "@xterm/xterm": "^5.5.0",
+    "electron": "^29.1.4",
+    "electron-builder": "^24.13.3",
+    "electron-vite": "^2.1.0",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.21"
+  }
+}

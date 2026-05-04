@@ -1,0 +1,193 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Dark theme (default) ─── */
+:root,
+[data-theme="dark"] {
+  --bg-primary: #1a1a2e;
+  --bg-secondary: #16213e;
+  --bg-tertiary: #0f3460;
+  --bg-hover: #1e2a4a;
+  --bg-active: #0f3460;
+  --bg-terminal: #0d0d0d;
+  --bg-modal: #1e1e3a;
+  --accent: #4f9eff;
+  --accent-hover: #3a8aee;
+  --accent-danger: #e94560;
+  --text-primary: #e8e8f0;
+  --text-secondary: #9090aa;
+  --text-muted: #5a5a72;
+  --border: #2a2a4a;
+  --border-light: #3a3a5a;
+  --success: #4caf50;
+  --warning: #ff9800;
+  --error: #f44336;
+  --shadow: rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Light theme ─── */
+[data-theme="light"] {
+  --bg-primary: #f4f4f8;
+  --bg-secondary: #eaeaf0;
+  --bg-tertiary: #dcdce8;
+  --bg-hover: #e2e2ec;
+  --bg-active: #c8d4f0;
+  --bg-terminal: #0d0d0d;
+  --bg-modal: #ffffff;
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-danger: #dc2626;
+  --text-primary: #1a1a2e;
+  --text-secondary: #52526e;
+  --text-muted: #9090a8;
+  --border: #d4d4e0;
+  --border-light: #c4c4d4;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+  --shadow: rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Layout variables (theme-independent) ─── */
+:root {
+  --sidebar-width: 240px;
+  --titlebar-height: 36px;
+  --tabbar-height: 36px;
+  --radius: 6px;
+  --radius-sm: 4px;
+}
+
+html, body, #app {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  user-select: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-muted);
+}
+
+select option {
+  background: var(--bg-modal);
+  color: var(--text-primary);
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ─── Shared button styles ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.15s, opacity 0.15s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); }
+.btn-secondary:hover { background: var(--bg-hover); }
+
+.btn-danger { background: var(--accent-danger); color: #fff; }
+.btn-danger:hover { opacity: 0.85; }
+
+.btn-ghost { background: transparent; color: var(--text-secondary); padding: 5px 8px; }
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ─── Modal ─── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-modal);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 460px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 96px);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px var(--shadow);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.form-row { display: flex; gap: 10px; }
+.form-row > * { flex: 1; }
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.error-msg { color: var(--error); font-size: 12px; margin-top: 8px; }
+.success-msg { color: var(--success); font-size: 12px; margin-top: 8px; }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
