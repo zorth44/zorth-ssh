@@ -52,7 +52,7 @@ npm run dev
 
 ## 打包发布
 
-本地打包：
+### 本地打包
 
 ```bash
 # Linux ARM64
@@ -62,14 +62,34 @@ npm run dist:linux
 npm run dist:win
 ```
 
-**自动打包（推荐）**：推送版本 Tag，GitHub Actions 自动构建并发布到 Releases：
+### 自动构建发布（推荐）
+
+推送符合 `v*` 格式的 Git Tag 会自动触发 GitHub Actions，完成构建并发布到 Releases。
+
+**步骤：**
 
 ```bash
+# 1. 确保本地代码已提交并推送到 main
+git add .
+git commit -m "release: v1.0.0"
+git push
+
+# 2. 打 Tag 并推送（必须以 v 开头，如 v1.0.0、v1.2.3）
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-构建完成后在 [Releases](https://github.com/zorth44/zorth-ssh/releases) 页面下载对应平台的安装包。
+**CI 流程（`.github/workflows/release.yml`）：**
+
+| 阶段 | Runner | 产物 |
+|------|--------|------|
+| `build-linux-arm64` | ubuntu-24.04-arm（真实 ARM64）+ Ubuntu 20.04 容器 | `*.AppImage` |
+| `build-windows` | windows-latest | `*.exe`（Portable） |
+| `release` | ubuntu-latest | 创建 GitHub Release，附上两个安装包 |
+
+> Linux 构建故意使用 Ubuntu 20.04 容器（glibc 2.31），以确保与银河麒麟 V10 ARM64 兼容。
+
+构建完成（约 5–10 分钟）后，在 [Releases](https://github.com/zorth44/zorth-ssh/releases) 页面下载对应平台的安装包。
 
 ---
 
