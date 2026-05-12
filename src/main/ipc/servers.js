@@ -1,5 +1,5 @@
 import { query } from '../db'
-import { encrypt } from '../crypto'
+import { encrypt, decrypt } from '../crypto'
 import { loadConfig } from './settings'
 
 function getSecret() {
@@ -86,6 +86,27 @@ export function registerServersIpc(ipcMain) {
     try {
       await query('UPDATE servers SET group_id=NULL WHERE group_id=?', [id])
       await query('DELETE FROM `groups` WHERE id=?', [id])
+      return { success: true }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('server:get-plaintext', async (_, id) => {
+    try {
+      const rows = await query('SELECT password FROM servers WHERE id=?', [id])
+      if (!rows.length) return { success: false, error: '服务器不存在' }
+      const plain = decrypt(rows[0].password, getSecret())
+      return { success: true, password: plain }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('server:update-password', async (_, { id, password }) => {
+    try {
+      const encPwd = password ? encrypt(password, getSecret()) : null
+      await query('UPDATE servers SET password=?, updated_at=NOW() WHERE id=?', [encPwd, id])
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }

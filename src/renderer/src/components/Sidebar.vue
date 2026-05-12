@@ -46,7 +46,10 @@
             @dblclick="emit('connect', server)"
             @contextmenu.prevent="showMenu($event, server)"
           >
-            <span class="server-icon">🖥</span>
+            <svg class="server-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <path d="M8 21h8M12 17v4"/>
+            </svg>
             <div class="server-info">
               <div class="server-name">{{ server.name }}</div>
               <div v-if="parseTags(server.tags).length" class="server-tags">
@@ -69,11 +72,36 @@
     <!-- Footer -->
     <div class="sidebar-footer">
       <button class="add-btn" @click="emit('add')">
-        <span>＋</span> 新建服务器
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        新建服务器
       </button>
       <div class="footer-btns">
-        <button class="footer-btn" title="SSH 密钥" @click="emit('keys')">🔑</button>
-        <button class="footer-btn" title="设置" @click="emit('settings')">⚙️</button>
+        <button class="footer-btn" title="刷新服务器列表" @click="emit('refresh')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+        <button class="footer-btn" title="密码本" @click="emit('password-book')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="5" y="2" width="14" height="20" rx="2"/>
+            <path d="M12 10v4M10 12h4"/>
+            <path d="M9 7h6M9 17h3"/>
+          </svg>
+        </button>
+        <button class="footer-btn" title="SSH 密钥" @click="emit('keys')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
+          </svg>
+        </button>
+        <button class="footer-btn" title="设置" @click="emit('settings')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -99,7 +127,7 @@ import { ref, computed } from 'vue'
 import { useAppStore } from '../stores/useAppStore'
 import { useTheme } from '../composables/useTheme'
 
-const emit = defineEmits(['connect', 'open-fm', 'edit', 'add', 'settings', 'keys'])
+const emit = defineEmits(['connect', 'open-fm', 'edit', 'add', 'settings', 'keys', 'password-book', 'refresh'])
 const store = useAppStore()
 const { theme } = useTheme()
 
@@ -395,7 +423,7 @@ async function onDelete() {
 .server-item:hover { background: var(--bg-hover); }
 .server-item:active { background: var(--bg-active); }
 
-.server-icon { font-size: 13px; flex-shrink: 0; opacity: 0.7; margin-top: 2px; }
+.server-icon { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.65; margin-top: 2px; }
 
 .server-info { min-width: 0; flex: 1; }
 
@@ -457,8 +485,10 @@ async function onDelete() {
   font-size: 14px;
   cursor: pointer;
   transition: background 0.15s;
+  color: var(--text-secondary);
 }
-.footer-btn:hover { background: var(--bg-hover); }
+.footer-btn svg { width: 15px; height: 15px; }
+.footer-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
 
 /* ─── Context menu ─── */
 .ctx-backdrop {

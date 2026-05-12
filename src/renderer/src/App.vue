@@ -3,12 +3,23 @@
     <!-- Title bar -->
     <div class="titlebar">
       <div class="titlebar-drag">
-        <span class="app-logo">⚡</span>
+        <svg class="app-logo" viewBox="0 0 24 24" fill="currentColor" style="width:16px;height:16px;color:var(--accent)">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
         <span class="app-name">Zorth SSH</span>
       </div>
       <div class="titlebar-right">
         <button class="theme-toggle" :title="theme === 'dark' ? '切换亮色主题' : '切换暗色主题'" @click="toggleTheme">
-          <span class="theme-icon">{{ theme === 'dark' ? '☀' : '🌙' }}</span>
+          <svg v-if="theme === 'dark'" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+          <svg v-else class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
           <span class="theme-label">{{ theme === 'dark' ? '亮色' : '暗色' }}</span>
         </button>
         <div class="titlebar-sep" />
@@ -30,6 +41,8 @@
         @edit="openServerModal"
         @settings="settingsVisible = true"
         @keys="keysVisible = true"
+        @password-book="passwordBookVisible = true"
+        @refresh="store.loadServers()"
       />
       <div class="main-area">
         <TabBar
@@ -40,7 +53,11 @@
         />
         <div class="terminal-area">
           <div v-if="!store.tabs.length" class="empty-hint">
-            <div class="empty-icon">⚡</div>
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor" style="width:40px;height:40px;opacity:0.3">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+              </svg>
+            </div>
             <div class="empty-line">双击左侧服务器 — 打开终端</div>
             <div class="empty-line">右键左侧服务器 — 文件管理器 / 编辑 / 删除</div>
           </div>
@@ -72,6 +89,7 @@
       @saved="onServerSaved"
     />
     <KeysModal v-if="keysVisible" @close="keysVisible = false" />
+    <PasswordBookModal v-if="passwordBookVisible" @close="passwordBookVisible = false" />
     <SettingsModal
       v-if="settingsVisible"
       @close="settingsVisible = false"
@@ -99,6 +117,7 @@ import FileManager from './components/FileManager.vue'
 import ServerModal from './components/ServerModal.vue'
 import KeysModal from './components/KeysModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import PasswordBookModal from './components/PasswordBookModal.vue'
 
 const api = window.api
 const store = useAppStore()
@@ -109,6 +128,7 @@ const serverModalVisible = ref(false)
 const editingServer = ref(null)
 const keysVisible = ref(false)
 const settingsVisible = ref(false)
+const passwordBookVisible = ref(false)
 
 let unsubOutput = null
 let unsubClosed = null
@@ -187,7 +207,7 @@ async function onSettingsSaved() {
   font-weight: 500;
 }
 
-.app-logo { font-size: 15px; }
+.app-logo { flex-shrink: 0; }
 .app-name { color: var(--text-primary); }
 
 .titlebar-right {
@@ -220,7 +240,7 @@ async function onSettingsSaved() {
   color: var(--text-primary);
 }
 
-.theme-icon { font-size: 14px; line-height: 1; }
+.theme-icon { width: 14px; height: 14px; flex-shrink: 0; }
 .theme-label { font-size: 12px; }
 
 .win-btn {
@@ -287,8 +307,7 @@ async function onSettingsSaved() {
 }
 
 .empty-icon {
-  font-size: 40px;
-  opacity: 0.3;
+  line-height: 1;
 }
 
 .toast-container {

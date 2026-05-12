@@ -11,7 +11,9 @@ contextBridge.exposeInMainWorld('api', {
     list: () => ipcRenderer.invoke('server:list'),
     create: (s) => ipcRenderer.invoke('server:create', s),
     update: (s) => ipcRenderer.invoke('server:update', s),
-    delete: (id) => ipcRenderer.invoke('server:delete', id)
+    delete: (id) => ipcRenderer.invoke('server:delete', id),
+    getPlaintext: (id) => ipcRenderer.invoke('server:get-plaintext', id),
+    updatePassword: (id, password) => ipcRenderer.invoke('server:update-password', { id, password })
   },
   group: {
     list: () => ipcRenderer.invoke('group:list'),
